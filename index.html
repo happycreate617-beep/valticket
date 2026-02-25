@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>VALTICKET</title>
+</head>
+<body>
+    <h1>🎟️ 티켓 예매</h1>
+    <button onclick="reserve()">예매하기</button>
+    <p id="status"></p>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDFWY8cerpjSw-7KplcVtx9j7iYM4LIpR4",
+            authDomain: "valticket.firebaseapp.com",
+            projectId: "valticket"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function reserve() {
+            const seatRef = doc(db, "tickets", "seat1");
+            const seatSnap = await getDoc(seatRef);
+
+            if (seatSnap.exists() && seatSnap.data().reserved) {
+                document.getElementById("status").innerText = "이미 예매됨";
+            } else {
+                await setDoc(seatRef, { reserved: true });
+                document.getElementById("status").innerText = "예매 성공";
+            }
+        }
+        window.reserve = reserve;
+    </script>
+
+
+</body>
+</html>
