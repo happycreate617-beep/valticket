@@ -3,9 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <title>VALTICKET</title>
+    <style>
+        body {
+            font-family: Arial;
+        }
+        .seat-card {
+            display: inline-block;
+            margin: 15px;
+            text-align: center;
+        }
+        .seat-card img {
+            width: 150px;
+            height: 100px;
+            border-radius: 10px;
+        }
+        .seat-btn {
+            margin-top: 10px;
+            width: 150px;
+            height: 40px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .available {
+            background-color: gold;
+        }
+        .reserved {
+            background-color: red;
+            color: white;
+            cursor: not-allowed;
+        }
+    </style>
 </head>
 <body>
     <h1>🎟️ 티켓 예매</h1>
+    <div id="seatContainer"></div>
     <button onclick="reserve()">예매하기</button>
     <p id="status"></p>
 
@@ -22,18 +55,60 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        async function reserve() {
-            const seatRef = doc(db, "tickets", "seat1");
+        const seats = [
+            { id: "seat1", image: "https://i.namu.wiki/i/wZJPej11DJBRisig9vB7rG9OztP_oyWt-ZwootMPyliZOCMy3y4tsvPyBJ7niCkiZevRA5_YGabiCJwZrokLMvk54vehKOMvDI2kIr5uBxGRqHR3mHcQ6MEM0BkXUeB21BkZ43yguttWFMK4ZkKKkA.webp" },
+            { id: "seat2", image: "https://i.namu.wiki/i/lVdwLV-9mK7yhj8lqZmq9_PjFpluIMDvle97RWz7mjTbw3qiPDGaWEPS667tzbQQmmR-fRKqJsjj5bishdveNvTlxeoFcppwSqX2frRsyeLQFjdDSO8ImhVPsff18CEd37SyYg1i3r7Y78DkHU5Edg.webp" },
+            { id: "seat3", image: "https://i.namu.wiki/i/dOFh3iVjL9Djr5FhbgjSVtN5WmM2IFi3lCJ5mp3O0R0H6t6N_nRJrX7O5Onf6maXrbnnECZjwym944-qN7xamydncng5aHdkYiebkn-h1DmSuX34jQwUkvXBQZ6gjpAuvWqqpaECQgYxvGLghO4-8A.webp" }
+        ];
+
+        async function loadSeats() {
+            const container = document.getElementById("seatContainer");
+            container.innerHTML = "";
+
+            for (let seat of seats) {
+                const seatRef = doc(db, "tickets", seat.id);
+                const seatSnap = await getDoc(seatRef);
+        
+                let isReserved = false;
+                if (seatSnap.exists()) {
+                    isReserved = seatSnap.data().reserved;
+                }
+
+                const card = document.createElement("div");
+                card.className = "seat-card";
+
+                const img = document.createElement("img");
+                img.src = seat.image;
+
+                const btn = document.createElement("button");
+                btn.className = "seat-btn ";
+                if (isReserved) {
+                    btn.innerText = "예약됨";
+                    btn.classList.add ("reserved");
+                    btn.disabled = true;
+                } else {
+                    btn.innerText = "예약 가능";
+                    btn.classList.add ("available");
+                    btn.onclick = () => reserve(seat.id);
+                }
+                card.appendChild(img);
+                card.appendChild(btn);
+                container.appendChild(card);
+            }
+        }
+
+        async function reserve(seatId) {
+            const seatRef = doc(db, "tickets", "seatId");
             const seatSnap = await getDoc(seatRef);
 
             if (seatSnap.exists() && seatSnap.data().reserved) {
-                document.getElementById("status").innerText = "이미 예매됨";
+                alert
             } else {
                 await setDoc(seatRef, { reserved: true });
-                document.getElementById("status").innerText = "예매 성공";
-            }
+                alert("예약이 완료되었습니다!");
+                loadSeats();
         }
-        window.reserve = reserve;
+        loadSeats();
     </script>
 
 
