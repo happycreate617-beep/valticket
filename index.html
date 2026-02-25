@@ -98,15 +98,16 @@
         }
 
         async function reserve(seatId) {
-            const seatRef = doc(db, "tickets", "seatId");
+            const seatRef = doc(db, "tickets", seatId);
             const seatSnap = await getDoc(seatRef);
 
             if (seatSnap.exists() && seatSnap.data().reserved) {
-                alert
+                alert("이미 예약된 좌석입니다. 다른 좌석을 선택해주세요.");
             } else {
                 await setDoc(seatRef, { reserved: true });
                 alert("예약이 완료되었습니다!");
                 loadSeats();
+        }
         }
         loadSeats();
     </script>
